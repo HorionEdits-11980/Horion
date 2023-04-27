@@ -1,12 +1,11 @@
 #include "BindCommand.h"
 
 #include "../../Module/ModuleManager.h"
+#include "../../Utils/Utils.h"
+#include <algorithm>
 
 BindCommand::BindCommand() : IMCCommand("bind", "Binds modules to specific keys", "<module> <key>") {
 	registerAlias("b");
-}
-
-BindCommand::~BindCommand() {
 }
 
 bool BindCommand::execute(std::vector<std::string>* args) {
@@ -37,11 +36,11 @@ bool BindCommand::execute(std::vector<std::string>* args) {
 			}
 
 			for (int i = 0; i < 190; i++) {
-				const char* haystack = KeyNames[i];
+				const char* haystack = Utils::getKeybindName(i);
 				size_t len = strlen(needle) + 1;
 				char* haystackLowercase = new char[len];
-				for (int i = 0; i < len; i++)
-					haystackLowercase[i] = tolower(haystack[i]);
+				for (int j = 0; j < len; j++)
+					haystackLowercase[j] = tolower(haystack[j]);
 
 				if (strcmp(needle, haystackLowercase) == 0) {
 					mod->setKeybind(i);
@@ -62,18 +61,3 @@ bool BindCommand::execute(std::vector<std::string>* args) {
 		if (keyCode >= 0x30 && keyCode <= 0x5A) {
 			auto modOpt = moduleMgr->getModuleByName(moduleName);
 			if (!modOpt.has_value()) {
-				clientMessageF("%sCould not find module with name: %s", RED, moduleName.c_str());
-			} else {
-				modOpt.value()->setKeybind(keyCode);
-				clientMessageF("%sThe Keybind of %s is now '%c'", GREEN, mod->getModuleName(), keyCode);
-			}
-		} else {
-			clientMessageF("%sInvalid Key! Outside of ascii range: %X", RED, keyCode);
-		}
-		return true;
-	} else {
-		clientMessageF("%s%s is currently bound to %s", RED, mod->getModuleName(), Utils::getKeybindName(mod->getKeybind()));
-		return true;
-	}
-	
-}
